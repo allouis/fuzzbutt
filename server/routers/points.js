@@ -34,7 +34,7 @@ points.post('/', function (req, res, next) {
     }
   });
 
-  res.json(point.toObject());
+  res.json(point);
   res.end();
   
 });
