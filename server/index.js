@@ -18,6 +18,7 @@ var mongourl = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb:/
 var env = process.env.NODE_ENV || 'development';
 
 var app = express();
+mongoose.connect(mongourl);
 
 if (env === 'development') {
   app.use(errorHandler());
