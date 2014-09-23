@@ -11,7 +11,7 @@ var request = function (options) {
   var xhr = new XMLHttpRequest();
   xhr.open(options.method, options.url);
   xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.addEventListener('loaded', options.callback);
+  xhr.addEventListener('load', options.callback);
   xhr.send(JSON.stringify(options.data || {}));
 };
 ///////////////////////////////////////////////////
