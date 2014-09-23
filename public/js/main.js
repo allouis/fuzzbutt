@@ -19,6 +19,15 @@ var request = function (options) {
   xhr.send(JSON.stringify(options.data || {}));
 };
 ///////////////////////////////////////////////////
+//
+// Socket stuff
+var socket = io.connect(window.location.href);
+
+socket.on('locations', function (locations) {
+  console.log(locations);
+});
+
+// Socket stuff end
 
 function initialize() {
   var mapCanvas = document.getElementById('map_canvas');
@@ -85,6 +94,7 @@ if (navigator.geolocation) {
       name: new Date().toString(),
       coordinates: [position.coords.latitude, position.coords.longitude]
     };
+    socket.emit('updatedLocation', data);
     submitLocation(data, callback);
   },
   function(error) {
