@@ -19,6 +19,24 @@ var request = function (options) {
   xhr.send(JSON.stringify(options.data || {}));
 };
 ///////////////////////////////////////////////////
+//
+// Socket stuff
+var socket = io.connect(window.location.href);
+function updateMarker (location) {
+  var coords = location.coordinates;
+  var marker = Markers.find(location.id);
+  if(!marker) {
+    marker = Markers.create(coords, locadtion.id);
+    return marker;
+  }
+  marker.setPosition(new google.maps.LatLng(coords[0], coords[1]));
+}
+socket.on('updateLocation', updateMarker);
+
+socket.on('locations', function (locations) {
+  locations.forEach(updateMarker);
+});
+// Socket stuff end
 
 function initialize() {
   var mapCanvas = document.getElementById('map_canvas');
@@ -32,25 +50,40 @@ function initialize() {
   window.map = map;
 }
 
-function getPoints(){
-  var options = {
-    method: 'GET',
-    url: appUrl + endpoint.points,
-    callback: function(data) {
-      var points = convertPoints(data);
-      points.forEach(function(point) {
-        addMarker(point);
-      });
-    }
+var Markers = (function () {
+
+  var markers = {};
+
+  var create = function (coords, id) {
+    id = id || Math.random().toString(26).slice(3);
+    var marker = new google.maps.Marker({
+      position: new google.maps.LatLng(coords[0], coords[1]),
+      icon: markerImage,
+      map: map
+    });
+    markers[id] = marker;
+    marker.id = id;
+    return marker;
   };
-  request(options);
-}
+
+  var find = function (id) {
+    return markers[id] || null;
+  };
+
+  return {
+    create: create,
+    find: find
+  };
+
+}());
+
+
 
 function convertPoints(points){
   return points.map(function(point){
     return {position: new google.maps.LatLng(point.loc.coordinates[0], point.loc.coordinates[1]),
-            icon: markerImage,
-            map: map
+      icon: markerImage,
+      map: map
     };
   });
 }
@@ -63,34 +96,31 @@ function addMarker(feature) {
   });
 }
 
-function submitLocation(data, cb) {
-  var options = {
-    method: 'POST',
-    url: appUrl + endpoint.points,
-    data: data,
-    callback: cb
+function submitLocation(data) { 
+  socket.emit('location', data);
+}
+function success (position) {
+  var data = {
+    coordinates: [position.coords.latitude, position.coords.longitude]
   };
-  request(options);
+  var marker = Markers.create(data.coordinates);
+  data.id = marker.id;
+  submitLocation(data);
+}
+
+function error () {
+  alert('BASE HAS BEEN FUCKED');
 }
 
 if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(
-    function(position) {
-    var callback = function(data) {
-      var loc = new google.maps.LatLng(data.loc.coordinates[0], data.loc.coordinates[1]);
-      map.setCenter(loc);
-      getPoints();
-    };
-    var data = {
-      name: new Date().toString(),
-      coordinates: [position.coords.latitude, position.coords.longitude]
-    };
-    submitLocation(data, callback);
-  },
-  function(error) {
-    console.log(error);
-  },{ timeout: 30000, enableHighAccuracy:false}
-  );
+  navigator.geolocation.getCurrentPosition(function(position) {
+    var coords = position.coords;
+    var location = new google.maps.LatLng(coords.latitude, coords.longitude);
+    map.setCenter(location); 
+  }, error);
+
+  var geoOptions = { timeout: 30 * 1000, enableHighAccuracy: false };
+  navigator.geolocation.watchPosition(success, error, geoOptions);
 } else {
   console.log('Permission denied');
 }
