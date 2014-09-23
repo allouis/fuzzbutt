@@ -19,11 +19,11 @@ points.post('/', function (req, res, next) {
   var body = req.body;
   
   if (!body.name) {
-    res.send(401, 'Need a name field');
+    return res.send(401, 'Need a name field');
   }
 
   if (!body.coordinates) {
-    res.send(401, 'Need a coordinates array');
+    return res.send(401, 'Need a coordinates array');
   }
 
   var point = Points.create({
