@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/allouis/fuzzbutt",
   "dependencies": {
+    "express": "^4.9.4",
     "mongoose": "^3.8.16"
   }
 }
