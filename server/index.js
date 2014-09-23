@@ -50,7 +50,7 @@ var locations = [];
 io.on('connection', function (socket) {
   socket.on('location', function (data) {
     locations.push(data);
-    socket.broadcast('updatedLocation', data);
+    socket.broadcast.emit('updatedLocation', data);
   });
   socket.emit('locations', locations);
 });
