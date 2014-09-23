@@ -22,11 +22,20 @@ var request = function (options) {
 //
 // Socket stuff
 var socket = io.connect(window.location.href);
+function updateMarker (location) {
+  var coords = location.coordinates;
+  var marker = Markers.find(location.id);
+  if(!marker) {
+    marker = Markers.create(coords, locadtion.id);
+    return marker;
+  }
+  marker.setPosition(new google.maps.LatLng(coords[0], coords[1]));
+}
+socket.on('updateLocation', updateMarker);
 
 socket.on('locations', function (locations) {
-  console.log(locations);
+  locations.forEach(updateMarker);
 });
-
 // Socket stuff end
 
 function initialize() {
@@ -45,8 +54,8 @@ var Markers = (function () {
 
   var markers = {};
 
-  var create = function (coords) {
-    var id = Math.random().toString(26).slice(3);
+  var create = function (coords, id) {
+    id = id || Math.random().toString(26).slice(3);
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(coords[0], coords[1]),
       icon: markerImage,
@@ -68,19 +77,7 @@ var Markers = (function () {
 
 }());
 
-function getPoints(){
-  var options = {
-    method: 'GET',
-    url: appUrl + endpoint.points,
-    callback: function(data) {
-      var points = convertPoints(data);
-      points.forEach(function(point) {
-        addMarker(point);
-      });
-    }
-  };
-  request(options);
-}
+
 
 function convertPoints(points){
   return points.map(function(point){
@@ -100,13 +97,14 @@ function addMarker(feature) {
 }
 
 function submitLocation(data) { 
-  socket.emit('updatedLocation', data);
+  socket.emit('location', data);
 }
 function success (position) {
   var data = {
-    name: new Date().toString(),
     coordinates: [position.coords.latitude, position.coords.longitude]
   };
+  var marker = Markers.create(data.coordinates);
+  data.id = marker.id;
   submitLocation(data);
 }
 
@@ -115,6 +113,12 @@ function error () {
 }
 
 if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(function(position) {
+    var coords = position.coords;
+    var location = new google.maps.LatLng(coords.latitude, coords.longitude);
+    map.setCenter(location); 
+  }, error);
+
   var geoOptions = { timeout: 30 * 1000, enableHighAccuracy: false };
   navigator.geolocation.watchPosition(success, error, geoOptions);
 } else {
