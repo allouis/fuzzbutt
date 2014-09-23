@@ -58,8 +58,8 @@ function getPoints(){
 function convertPoints(points){
   return points.map(function(point){
     return {position: new google.maps.LatLng(point.loc.coordinates[0], point.loc.coordinates[1]),
-            icon: markerImage,
-            map: map
+      icon: markerImage,
+      map: map
     };
   });
 }
@@ -72,35 +72,24 @@ function addMarker(feature) {
   });
 }
 
-function submitLocation(data, cb) {
-  var options = {
-    method: 'POST',
-    url: appUrl + endpoint.points,
-    data: data,
-    callback: cb
+function submitLocation(data) { 
+  socket.emit('updatedLocation', data);
+}
+function success (position) {
+  var data = {
+    name: new Date().toString(),
+    coordinates: [position.coords.latitude, position.coords.longitude]
   };
-  request(options);
+  submitLocation(data);
+}
+
+function error () {
+  alert('BASE HAS BEEN FUCKED');
 }
 
 if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(
-    function(position) {
-    var callback = function(data) {
-      var loc = new google.maps.LatLng(data.loc.coordinates[0], data.loc.coordinates[1]);
-      map.setCenter(loc);
-      getPoints();
-    };
-    var data = {
-      name: new Date().toString(),
-      coordinates: [position.coords.latitude, position.coords.longitude]
-    };
-    socket.emit('updatedLocation', data);
-    submitLocation(data, callback);
-  },
-  function(error) {
-    console.log(error);
-  },{ timeout: 30000, enableHighAccuracy:false}
-  );
+  var geoOptions = { timeout: 30 * 1000, enableHighAccuracy: false };
+  navigator.geolocation.watchPosition(success, error, geoOptions);
 } else {
   console.log('Permission denied');
 }
