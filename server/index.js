@@ -41,7 +41,19 @@ routers.forEach(function (router) {
   app.use(router.path, router.handler);
 });
 
-var server = http.createServer(app);
+var server = http.Server(app);
+
+var io = require('socket.io')(server);
+
+var locations = [];
+
+io.on('connection', function (socket) {
+  socket.on('location', function (data) {
+    locations.push(data);
+    socket.broadcast('updatedLocation', data);
+  });
+  socket.emit('locations', locations);
+});
 
 module.exports = server;
 
