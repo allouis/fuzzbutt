@@ -3,13 +3,14 @@ var endpoint = {
   points: 'points'
 };
 
-var appUrl = 'http://localhost:3000/api/'
+var appUrl = 'http://localhost:3000/api/';
 
 // END CONFIG
 
 var request = function (options) {
   var xhr = new XMLHttpRequest();
   xhr.open(options.method, options.url);
+  xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.addEventListener('loaded', options.callback);
   xhr.send(JSON.stringify(options.data || {}));
 };
@@ -31,7 +32,7 @@ function submitLocation(data, cb) {
     url: appUrl + endpoint.points,
     data: data,
     callback: cb
-  }
+  };
   request(options);
 }
 
@@ -44,7 +45,7 @@ if (navigator.geolocation) {
     var data = {
       name: new Date().toString(),
       coordinates: [position.coords.latitude, position.coords.longitude]
-    }
+    };
     submitLocation(data, callback);
   },
   function(error) {
