@@ -5,7 +5,7 @@ var Router = express.Router;
 var main = new Router();
 
 main.get('/', function (req, res) {
-  res.send('Hello World');
+  res.render('index');
 });
 
 exports.handler = main;
