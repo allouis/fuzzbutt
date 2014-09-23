@@ -26,7 +26,7 @@ function updateMarker (location) {
   var coords = location.coordinates;
   var marker = Markers.find(location.id);
   if(!marker) {
-    marker = Markers.create(coords, locadtion.id);
+    marker = Markers.create(coords, location.id);
     return marker;
   }
   marker.setPosition(new google.maps.LatLng(coords[0], coords[1]));
