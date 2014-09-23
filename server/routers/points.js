@@ -26,7 +26,7 @@ points.post('/', function (req, res, next) {
     return res.send(401, 'Need a coordinates array');
   }
 
-  var point = Points.create({
+  var createPoint = Points.create({
     name: body.name,
     loc: {
       type: 'Point',
@@ -34,8 +34,10 @@ points.post('/', function (req, res, next) {
     }
   });
 
-  res.json(point);
-  res.end();
+  createPoint.then(function (point) {
+    res.json(point);
+    res.end();
+  });
   
 });
 
