@@ -3,7 +3,7 @@ var endpoint = {
   points: 'points'
 };
 
-var appUrl = 'http://localhost:3000/api/';
+var appUrl = window.location.href + 'api/';
 
 // END CONFIG
 
