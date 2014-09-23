@@ -41,6 +41,33 @@ function initialize() {
   window.map = map;
 }
 
+var Markers = (function () {
+
+  var markers = {};
+
+  var create = function (coords) {
+    var id = Math.random().toString(26).slice(3);
+    var marker = new google.maps.Marker({
+      position: new google.maps.LatLng(coords[0], coords[1]),
+      icon: markerImage,
+      map: map
+    });
+    markers[id] = marker;
+    marker.id = id;
+    return marker;
+  };
+
+  var find = function (id) {
+    return markers[id] || null;
+  };
+
+  return {
+    create: create,
+    find: find
+  };
+
+}());
+
 function getPoints(){
   var options = {
     method: 'GET',
