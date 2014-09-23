@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/allouis/fuzzbutt/issues"
   },
-  "homepage": "https://github.com/allouis/fuzzbutt"
+  "homepage": "https://github.com/allouis/fuzzbutt",
+  "dependencies": {
+    "mongoose": "^3.8.16"
+  }
 }
