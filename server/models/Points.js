@@ -6,3 +6,5 @@ var pointsSchema = mongoose.Schema({
 });
 
 var PointsModel = mongoose.model('Points', pointsSchema);
+
+module.exports = PointsModel;
