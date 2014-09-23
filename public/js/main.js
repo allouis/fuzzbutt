@@ -11,7 +11,9 @@ var request = function (options) {
   var xhr = new XMLHttpRequest();
   xhr.open(options.method, options.url);
   xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.addEventListener('load', options.callback);
+  xhr.addEventListener('load', function(event){
+    options.callback(JSON.parse(event.target.responseText));
+  });
   xhr.send(JSON.stringify(options.data || {}));
 };
 ///////////////////////////////////////////////////
@@ -24,6 +26,7 @@ function initialize() {
     mapTypeId: google.maps.MapTypeId.HYBRID
   };
   var map = new google.maps.Map(mapCanvas, mapOptions);
+  window.map = map;
 }
 
 function submitLocation(data, cb) {
@@ -39,8 +42,9 @@ function submitLocation(data, cb) {
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
     function(position) {
-    var callback = function(event) {
-      console.log(event);
+    var callback = function(data) {
+      var loc = new google.maps.LatLng(data.loc.coordinates[0], data.loc.coordinates[1]);
+      map.setCenter(loc);
     };
     var data = {
       name: new Date().toString(),
@@ -56,4 +60,4 @@ if (navigator.geolocation) {
   console.log('Permission denied');
 }
 
-google.maps.event.addDomListener(window, 'load', initialize);
+initialize();
